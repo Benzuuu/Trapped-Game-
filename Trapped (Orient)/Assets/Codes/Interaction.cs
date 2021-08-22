@@ -20,10 +20,6 @@ public class Interaction : MonoBehaviour
     public GameObject noteWindow;
     public Text noteText;
 
-
-    [Header("Item")]
-    public List<GameObject> pItems = new List<GameObject>();
-
     public GameObject hint;
     private float delayinSeconds = 3;
     
@@ -109,7 +105,7 @@ public class Interaction : MonoBehaviour
 
     public void PickUpItem(GameObject item)
     {
-        pItems.Add(item);
+        Manager.instance.AddToInventory(item);
     }
 
     public void ExamineItem(Item item)
