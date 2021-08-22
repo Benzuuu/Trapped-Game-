@@ -3,39 +3,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
+
 public class Movement : MonoBehaviour
 {
     public float moveSpeed = 1.0f;
     private Vector2 playerMoveInput;
+    private Animator anim;
 
     private Rigidbody2D rb;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
+        //As movement is detected, play moving animation
         if (context.started)
         {
-            //Debug.Log("Movement triggered");
+            anim.Play("Moving");
         }
 
+        //Retrieve input values and transfer valuesto the animator controller
         playerMoveInput = context.ReadValue<Vector2>();
-    }
+        anim.SetFloat("MoveX", playerMoveInput.x);
+        anim.SetFloat("MoveY", playerMoveInput.y);
 
-    //Would be removed
-    public void OnInteract(InputAction.CallbackContext context)
-    {
-        if (context.started)
+        //Determines the most recent direction faced by player before he stops
+        if (playerMoveInput != Vector2.zero)
         {
-            //Debug.Log("Interact triggered");
+            anim.SetFloat("DirX", playerMoveInput.x);
+            anim.SetFloat("DirY", playerMoveInput.y);
+        }
+        
+        //When movement is finished, play idle animation
+        if (context.performed)
+        {
+            anim.Play("Idle");
         }
     }
 
     private void FixedUpdate()
     {
-        //Debug.Log("Player movement: " + playerMoveInput);
         rb.velocity = playerMoveInput * moveSpeed;
+    }
+
+    public void StopPlayer()
+    {
+        anim.Play("Idle");
+        playerMoveInput = Vector2.zero;
     }
 }
