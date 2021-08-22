@@ -33,6 +33,14 @@ public class @Player : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""ToggleInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""d333556b-176f-484c-a2d8-096456023c48"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -101,6 +109,82 @@ public class @Player : IInputActionCollection, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8b9cc39-6ce5-4099-933a-321efb2c20b1"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""ToggleInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Inventory"",
+            ""id"": ""d50c9a48-0ed3-463e-aae8-577cb484edb6"",
+            ""actions"": [
+                {
+                    ""name"": ""Return"",
+                    ""type"": ""Button"",
+                    ""id"": ""7c065380-4e1c-4ae9-9132-9ef6b8737208"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Select Up"",
+                    ""type"": ""Button"",
+                    ""id"": ""578dbd81-4b1d-44c9-85eb-c7e495a76ce6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Select Down"",
+                    ""type"": ""Button"",
+                    ""id"": ""515d1163-38ff-481f-a100-5f69a3eab608"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""a410ed48-e20a-4498-b802-64007ee08884"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Return"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9bb6b322-c61b-4143-ad83-492359c89d32"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Select Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2d07cd89-7581-4c09-a488-bb49d30fc6df"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Select Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -123,6 +207,12 @@ public class @Player : IInputActionCollection, IDisposable
         m_General = asset.FindActionMap("General", throwIfNotFound: true);
         m_General_Movement = m_General.FindAction("Movement", throwIfNotFound: true);
         m_General_Interact = m_General.FindAction("Interact", throwIfNotFound: true);
+        m_General_ToggleInventory = m_General.FindAction("ToggleInventory", throwIfNotFound: true);
+        // Inventory
+        m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
+        m_Inventory_Return = m_Inventory.FindAction("Return", throwIfNotFound: true);
+        m_Inventory_SelectUp = m_Inventory.FindAction("Select Up", throwIfNotFound: true);
+        m_Inventory_SelectDown = m_Inventory.FindAction("Select Down", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -174,12 +264,14 @@ public class @Player : IInputActionCollection, IDisposable
     private IGeneralActions m_GeneralActionsCallbackInterface;
     private readonly InputAction m_General_Movement;
     private readonly InputAction m_General_Interact;
+    private readonly InputAction m_General_ToggleInventory;
     public struct GeneralActions
     {
         private @Player m_Wrapper;
         public GeneralActions(@Player wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_General_Movement;
         public InputAction @Interact => m_Wrapper.m_General_Interact;
+        public InputAction @ToggleInventory => m_Wrapper.m_General_ToggleInventory;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -195,6 +287,9 @@ public class @Player : IInputActionCollection, IDisposable
                 @Interact.started -= m_Wrapper.m_GeneralActionsCallbackInterface.OnInteract;
                 @Interact.performed -= m_Wrapper.m_GeneralActionsCallbackInterface.OnInteract;
                 @Interact.canceled -= m_Wrapper.m_GeneralActionsCallbackInterface.OnInteract;
+                @ToggleInventory.started -= m_Wrapper.m_GeneralActionsCallbackInterface.OnToggleInventory;
+                @ToggleInventory.performed -= m_Wrapper.m_GeneralActionsCallbackInterface.OnToggleInventory;
+                @ToggleInventory.canceled -= m_Wrapper.m_GeneralActionsCallbackInterface.OnToggleInventory;
             }
             m_Wrapper.m_GeneralActionsCallbackInterface = instance;
             if (instance != null)
@@ -205,10 +300,62 @@ public class @Player : IInputActionCollection, IDisposable
                 @Interact.started += instance.OnInteract;
                 @Interact.performed += instance.OnInteract;
                 @Interact.canceled += instance.OnInteract;
+                @ToggleInventory.started += instance.OnToggleInventory;
+                @ToggleInventory.performed += instance.OnToggleInventory;
+                @ToggleInventory.canceled += instance.OnToggleInventory;
             }
         }
     }
     public GeneralActions @General => new GeneralActions(this);
+
+    // Inventory
+    private readonly InputActionMap m_Inventory;
+    private IInventoryActions m_InventoryActionsCallbackInterface;
+    private readonly InputAction m_Inventory_Return;
+    private readonly InputAction m_Inventory_SelectUp;
+    private readonly InputAction m_Inventory_SelectDown;
+    public struct InventoryActions
+    {
+        private @Player m_Wrapper;
+        public InventoryActions(@Player wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Return => m_Wrapper.m_Inventory_Return;
+        public InputAction @SelectUp => m_Wrapper.m_Inventory_SelectUp;
+        public InputAction @SelectDown => m_Wrapper.m_Inventory_SelectDown;
+        public InputActionMap Get() { return m_Wrapper.m_Inventory; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(InventoryActions set) { return set.Get(); }
+        public void SetCallbacks(IInventoryActions instance)
+        {
+            if (m_Wrapper.m_InventoryActionsCallbackInterface != null)
+            {
+                @Return.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnReturn;
+                @Return.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnReturn;
+                @Return.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnReturn;
+                @SelectUp.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectUp;
+                @SelectUp.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectUp;
+                @SelectUp.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectUp;
+                @SelectDown.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectDown;
+                @SelectDown.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectDown;
+                @SelectDown.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelectDown;
+            }
+            m_Wrapper.m_InventoryActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Return.started += instance.OnReturn;
+                @Return.performed += instance.OnReturn;
+                @Return.canceled += instance.OnReturn;
+                @SelectUp.started += instance.OnSelectUp;
+                @SelectUp.performed += instance.OnSelectUp;
+                @SelectUp.canceled += instance.OnSelectUp;
+                @SelectDown.started += instance.OnSelectDown;
+                @SelectDown.performed += instance.OnSelectDown;
+                @SelectDown.canceled += instance.OnSelectDown;
+            }
+        }
+    }
+    public InventoryActions @Inventory => new InventoryActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -222,5 +369,12 @@ public class @Player : IInputActionCollection, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnToggleInventory(InputAction.CallbackContext context);
+    }
+    public interface IInventoryActions
+    {
+        void OnReturn(InputAction.CallbackContext context);
+        void OnSelectUp(InputAction.CallbackContext context);
+        void OnSelectDown(InputAction.CallbackContext context);
     }
 }
