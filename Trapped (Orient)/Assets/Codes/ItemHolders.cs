@@ -66,7 +66,7 @@ public class ItemHolders : MonoBehaviour
         }
     }
 
-    //Toggle select images in the holders
+    //Toggle select images in the holders, displays selected object's name and enlarged icon
     public void ToggleSelects(int current)
     {
         if (Manager.instance.playerInventory.Count > 0)

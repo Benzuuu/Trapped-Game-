@@ -12,19 +12,19 @@ public class Manager : MonoBehaviour
 
     public static Manager instance;
 
-    //Checkpoint implementation
+    [Header("Checkpoint implementation")]
     private GameObject player;
     public Vector2 playerPosition;
     public Vector2 playerSpawn;
 
-    //Death transition implementation
+    [Header("Death transition implementation")]
     public GameObject transitionCanvas;
     private Animator transitionAnim;
 
     //Shake implementation
     private GameObject cam;
 
-    //Inventory implementation
+    [Header("Inventory implementation")]
     public GameObject inventoryCanvas;
     private Movement playerMovement;
     private Animator inventoryAnim;
@@ -32,7 +32,11 @@ public class Manager : MonoBehaviour
     public List<GameObject> playerInventory;        //Public for external script access (e.g., ItemHolders.cs)
     public ItemHolders itemHolders;
     private int currentSelection;
-    
+
+    [Header("Despawn broadcasting")]
+    public EnemyIndicator eIndicate;
+    private GameObject[] forRemoval;
+
     //Check if instance is the same instance throughout as soon as the scene is loaded (runs before Start())
     private void Awake()
     {
@@ -71,6 +75,11 @@ public class Manager : MonoBehaviour
         StartCoroutine(RespawnCor());
     }
 
+    /*
+     * Note: Enemy indicator script has references to existing Game objects which are despawned by this script
+     *       and as such, references are cleared by "eIndicate" before destroy methods are called. Could use
+     *       improvements.
+     */
     private IEnumerator RespawnCor()
     {
         transitionAnim.Play("Fade in");
@@ -80,7 +89,9 @@ public class Manager : MonoBehaviour
         player.transform.position = playerSpawn;
 
         //Possible error source: Object with "Enemy" tag has no "EnemyAI" script or child classes of thereof
-        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy"))
+        forRemoval = GameObject.FindGameObjectsWithTag("Enemy");
+        eIndicate.clearReferences(forRemoval);
+        foreach (GameObject e in forRemoval)
         {
             e.GetComponent<EnemyAI>().Despawn();
         }
@@ -103,7 +114,9 @@ public class Manager : MonoBehaviour
         cam.GetComponent<Animator>().Play("Shake");
 
         //Possible error source: Object with "Enemy" tag has no "EnemyAI" script or child classes of thereof
-        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy"))
+        forRemoval = GameObject.FindGameObjectsWithTag("Enemy");
+        eIndicate.clearReferences(forRemoval);
+        foreach (GameObject e in forRemoval)
         {
             e.GetComponent<EnemyAI>().Despawn();
         }
